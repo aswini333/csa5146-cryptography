@@ -1,49 +1,76 @@
-from collections import Counter
+import string
 
-# Function to decrypt ciphertext using a simple substitution cipher
-def decrypt_simple_substitution(ciphertext):
-    # Frequency analysis to find the most common characters
-    freq = Counter(ciphertext)
-    most_common = freq.most_common(3)  # Get the three most common characters
+# Function to generate the cipher alphabet from a keyword
+def generate_cipher_alphabet(keyword):
+    # Remove any duplicate letters in the keyword
+    keyword = ''.join(dict.fromkeys(keyword))
     
-    # Assuming the most frequent character is 'e'
-    e_cipher = most_common[0][0]
-    e_plain = 'e'
+    # Initialize the cipher alphabet with the unique letters from the keyword
+    cipher_alphabet = list(keyword)
     
-    # Assuming the second most frequent character is 't'
-    t_cipher = most_common[1][0]
-    t_plain = 't'
+    # Add the remaining unused letters of the alphabet
+    alphabet = string.ascii_uppercase
+    for char in alphabet:
+        if char not in cipher_alphabet:
+            cipher_alphabet.append(char)
     
-    # Assuming the third most frequent character is 'h'
-    h_cipher = most_common[2][0]
-    h_plain = 'h'
+    return ''.join(cipher_alphabet)
+
+# Function to create encryption and decryption mappings
+def create_mappings(keyword):
+    plain_alphabet = string.ascii_uppercase
+    cipher_alphabet = generate_cipher_alphabet(keyword.upper())
     
-    # Decrypt the ciphertext using these assumptions
-    decrypted_text = []
-    for char in ciphertext:
-        if char == e_cipher:
-            decrypted_text.append(e_plain)
-        elif char == t_cipher:
-            decrypted_text.append(t_plain)
-        elif char == h_cipher:
-            decrypted_text.append(h_plain)
+    # Create encryption dictionary
+    encryption_map = {}
+    for i in range(len(plain_alphabet)):
+        encryption_map[plain_alphabet[i]] = cipher_alphabet[i]
+    
+    # Create decryption dictionary
+    decryption_map = {}
+    for i in range(len(cipher_alphabet)):
+        decryption_map[cipher_alphabet[i]] = plain_alphabet[i]
+    
+    return encryption_map, decryption_map
+
+# Function to encrypt plaintext using monoalphabetic cipher with a keyword
+def monoalphabetic_encrypt(plaintext, keyword):
+    encryption_map, _ = create_mappings(keyword)
+    
+    ciphertext = []
+    for char in plaintext.upper():
+        if char.isalpha():
+            ciphertext.append(encryption_map[char])
         else:
-            decrypted_text.append(char)
+            ciphertext.append(char)  # Keep non-alphabetic characters unchanged
     
-    return ''.join(decrypted_text)
+    return ''.join(ciphertext)
 
-# Main function to decrypt the ciphertext
+# Function to decrypt ciphertext using monoalphabetic cipher with a keyword
+def monoalphabetic_decrypt(ciphertext, keyword):
+    _, decryption_map = create_mappings(keyword)
+    
+    plaintext = []
+    for char in ciphertext.upper():
+        if char.isalpha():
+            plaintext.append(decryption_map[char])
+        else:
+            plaintext.append(char)  # Keep non-alphabetic characters unchanged
+    
+    return ''.join(plaintext)
+
+# Main function to demonstrate monoalphabetic cipher with keyword
 def main():
-    ciphertext = ("53‡‡†305))6*;4826)4‡.)4‡);806*;48†8¶60))85;;]8*;:‡*8†83"
-                  "(88)5*†;46(;88*96*?;8)*‡(;485);5*†2:*‡(;4956*2(5*—4)8¶8*"
-                  ";4069285);)6†8)4‡‡;1(‡9;48081;8:8‡1;48†85;4)485†528806*81"
-                  " (‡9;48;(88;4(‡?34;48)4‡;161;:188;‡?;")
+    keyword = "CIPHER"
+    plaintext = "Hello World!"
     
-    # Decrypt using simple substitution
-    decrypted_message = decrypt_simple_substitution(ciphertext)
+    # Encrypt plaintext
+    encrypted_text = monoalphabetic_encrypt(plaintext, keyword)
+    print("Encrypted:", encrypted_text)
     
-    print("Decrypted message:")
-    print(decrypted_message)
+    # Decrypt ciphertext
+    decrypted_text = monoalphabetic_decrypt(encrypted_text, keyword)
+    print("Decrypted:", decrypted_text)
 
 if __name__ == "__main__":
     main()
